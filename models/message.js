@@ -31,7 +31,7 @@ module.exports = function (sequelize, DataTypes) {
 		// When an Author is deleted, also delete any associated Posts
 		Message.belongsTo(models.User, { as: 'Sender' });
 		Message.belongsTo(models.User, { as: 'Keeper' });
-		Message.belongsToMany(models.SeenMessages, { as: 'Message' });
+		//Message.belongsToMany(models.SeenMessages, { as: 'Message' });
 	};
 
 	return Message;

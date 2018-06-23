@@ -9,6 +9,7 @@ import { TextArea } from "../components/Form/TextArea";
 import { FormBtn } from "../components/Form/FormBtn";
 import { List } from "../components/List/List";
 import { ListItem } from "../components/List/ListItem";
+const store = require('store');
 
 
 
@@ -21,6 +22,14 @@ class SendBottle extends Component {
   };
   componentDidMount() {
     this.loadMessages();
+    if (store.get('bottle')) {
+      let bottle = store.get('bottle')
+      this.setState({
+        title: bottle.title,
+        message: bottle.message
+      })
+
+    }
   }
   loadMessages = () => {
     API.getMessages()
@@ -42,17 +51,26 @@ class SendBottle extends Component {
     this.setState({
       [name]: value
     });
+    store.set('bottle', {
+      title: this.state.title,
+      message: this.state.message
+    });
   };
 
 
   handleFormSubmit = event => {
     event.preventDefault();
     if (this.state.title && this.state.message) {
+
       API.saveMessage({
         title: this.state.title,
         message: this.state.message
       })
-        .then(res => this.loadMessages())
+
+        .then(res => {
+          this.loadMessages();
+          store.clearAll();
+        })
         .catch(err => console.log(err));
     }
   };
@@ -122,5 +140,7 @@ class SendBottle extends Component {
     );
   }
 }
-
+store.each(function (value, key) {
+  console.log(key, '==', value)
+})
 export default SendBottle;

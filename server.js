@@ -1,7 +1,11 @@
 const express = require('express');
+var bodyParser = require("body-parser");
+var passport   = require('passport');
+var session    = require('express-session');
 const path = require('path');
 const cluster = require('cluster');
 const numCPUs = require('os').cpus().length;
+const mysql = require('mysql2');
 
 const PORT = process.env.PORT || 5000;
 
@@ -34,6 +38,23 @@ if (cluster.isMaster) {
 	app.get('*', function (request, response) {
 		response.sendFile(path.resolve(__dirname, '../react-ui/build', 'index.html'));
 	});
+// Requiring our models for syncing
+var models = require("./models");
+
+ //Sync Database
+ models.sequelize.sync(
+	//  {force: true}
+	).then(function() {
+	console.log('Nice! Database looks fine')
+  }).catch(function(err) {
+	console.log(err, "Something went wrong with the Database Update!")
+  });
+  
+  //Routes
+  var authRoute = require('./routes/auth.js')(app,passport);
+  
+  //load passport strategies
+  require('./config/passport/passport.js')(passport, models.User);
 
 	app.listen(PORT, function () {
 		console.error(`Node cluster worker ${process.pid}: listening on port ${PORT}`);
